@@ -121,6 +121,14 @@ Window {
 
     onVisibleChanged: { if (visible && menuBar) { menuBar.__parentWindow = root } }
 
+    /*!
+        \qmlproperty bool ApplicationWindow::contentFollowsContentOrientation
+
+        When set to true then main scene Item is rotated by
+        Screen.angleBetween(contentOrientation, Qt.PortraitOrientation) degrees.
+    */
+    property bool contentFollowsContentOrientation: false
+
     /*! \internal */
     default property alias data: contentArea.data
 
@@ -131,7 +139,13 @@ Window {
 
     Item {
         id: backgroundItem
-        anchors.fill: parent
+        anchors.centerIn: root.contentItem
+        property bool isPortrait: contentOrientation === Qt.PortraitOrientation || contentOrientation === Qt.InvertedPortraitOrientation
+        objectName: "backgroundItem"
+
+        width: (!contentFollowsContentOrientation || backgroundItem.isPortrait) ? root.width : root.height
+        height: (!contentFollowsContentOrientation || backgroundItem.isPortrait) ? root.height : root.width
+        rotation: contentFollowsContentOrientation ? Screen.angleBetween(contentOrientation, Qt.PrimaryOrientation) : 0
 
         Keys.forwardTo: menuBar ? [menuBar.__contentItem] : []
 
