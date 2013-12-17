@@ -112,7 +112,7 @@ public:
     }
 
     void initialize(QSGTexture *texture,
-                    const QRectF &bounds,
+                    const QRectF &bounds, qreal devicePixelRatio,
                     int left, int top, int right, int bottom) {
 
         delete m_material.texture();
@@ -127,6 +127,9 @@ public:
 
         QRectF tc = texture->normalizedTextureSubRect();
         QSize ts = texture->textureSize();
+        ts.setHeight(ts.height() / devicePixelRatio);
+        ts.setWidth(ts.width() / devicePixelRatio);
+
         qreal invtw = tc.width() / ts.width();
         qreal invth = tc.height() / ts.height();
 
@@ -208,6 +211,7 @@ QQuickStyleItem::QQuickStyleItem(QQuickItem *parent)
     setFlag(QQuickItem::ItemHasContents, true);
     setSmooth(false);
 
+    connect(this, SIGNAL(visibleChanged()), this, SLOT(updateItem()));
     connect(this, SIGNAL(widthChanged()), this, SLOT(updateItem()));
     connect(this, SIGNAL(heightChanged()), this, SLOT(updateItem()));
     connect(this, SIGNAL(enabledChanged()), this, SLOT(updateItem()));
@@ -913,6 +917,7 @@ QSize QQuickStyleItem::sizeFromContents(int width, int height)
             frame.state = m_styleoption->state;
             frame.lineWidth = qApp->style()->pixelMetric(QStyle::PM_DefaultFrameWidth, m_styleoption, 0);
             frame.rect = m_styleoption->rect;
+            frame.styleObject = this;
             size = qApp->style()->sizeFromContents(QStyle::CT_LineEdit, &frame, QSize(width, height));
         }
         break;
@@ -1578,6 +1583,7 @@ void QQuickStyleItem::paint(QPainter *painter)
             frame.lineWidth = fw;
             frame.midLineWidth = 0;
             frame.rect = m_styleoption->rect;
+            frame.styleObject = this;
             qApp->style()->drawPrimitive(QStyle::PE_FrameMenu, &frame, painter);
         }
     }
@@ -1613,7 +1619,10 @@ bool QQuickStyleItem::hasThemeIcon(const QString &icon) const
 bool QQuickStyleItem::event(QEvent *ev)
 {
     if (ev->type() == QEvent::StyleAnimationUpdate) {
-        polish();
+        if (isVisible()) {
+            ev->accept();
+            polish();
+        }
         return true;
     } else if (ev->type() == QEvent::StyleChange) {
         if (m_itemType == ScrollBar)
@@ -1661,6 +1670,7 @@ QSGNode *QQuickStyleItem::updatePaintNode(QSGNode *node, UpdatePaintNodeData *)
 
     styleNode->initialize(window()->createTextureFromImage(m_image, QQuickWindow::TextureCanUseAtlas),
                           boundingRect(),
+                          window()->devicePixelRatio(),
                           m_border.left(), m_border.top(), m_border.right(), m_border.bottom());
     return styleNode;
 }

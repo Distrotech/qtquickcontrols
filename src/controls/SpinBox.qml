@@ -38,7 +38,7 @@
 **
 ****************************************************************************/
 
-import QtQuick 2.1
+import QtQuick 2.2
 import QtQuick.Controls 1.1
 import QtQuick.Controls.Private 1.0
 
@@ -164,18 +164,31 @@ Control {
     */
     readonly property alias hovered: mouseArea.containsMouse
 
+    /*!
+        \qmlsignal SpinBox::editingFinished()
+        \since 5.2
+
+        This signal is emitted when the Return or Enter key is pressed or
+        the control loses focus. Note that if there is a validator
+        set on the control and enter/return is pressed, this signal will
+        only be emitted if the validator returns an acceptable state.
+    */
+    signal editingFinished()
+
     style: Qt.createComponent(Settings.style + "/SpinBoxStyle.qml", spinbox)
 
     /*! \internal */
     function __increment() {
         validator.increment()
-        input.selectValue()
+        if (activeFocus)
+            input.selectValue()
     }
 
     /*! \internal */
     function __decrement() {
         validator.decrement()
-        input.selectValue()
+        if (activeFocus)
+            input.selectValue()
     }
 
     /*! \internal */
@@ -242,7 +255,7 @@ Control {
 
         horizontalAlignment: spinbox.horizontalAlignment
         verticalAlignment: __panel ? __panel.verticalAlignment : Qt.AlignVCenter
-        selectByMouse: true
+        selectByMouse: activeFocus || activeFocusOnPress
 
         validator: SpinBoxValidator {
             id: validator
@@ -254,6 +267,8 @@ Control {
             input.text = validator.text
             selectValue()
         }
+
+        onEditingFinished: spinbox.editingFinished()
 
         color: __panel ? __panel.foregroundColor : "black"
         selectionColor: __panel ? __panel.selectionColor : "black"

@@ -118,13 +118,15 @@ TestCase {
     }
 
     function test_arraymodelwithtextrole() {
-        // FIXME The use-case before this change should work.
-        var comboBox = Qt.createQmlObject('import QtQuick.Controls 1.1 ; \
-                ComboBox { \
-                    model: [ { "text": "Banana", "color": "Yellow"}, \
-                             { "text": "Apple", "color": "Green"}, \
-                             { "text": "Coconut", "color": "Brown"} ]; \
-                    textRole: "text" }', testCase, '');
+        var arrayModel = [
+            {text: 'Banana', color: 'Yellow'},
+            {text: 'Apple', color: 'Green'},
+            {text: 'Coconut', color: 'Brown'}
+        ];
+
+        var comboBox = Qt.createQmlObject('import QtQuick.Controls 1.1 ; ComboBox { }', testCase, '');
+        comboBox.textRole = "text"
+        comboBox.model = arrayModel
         compare(comboBox.currentIndex, 0)
         compare(comboBox.currentText, "Banana")
         comboBox.textRole = "color"
@@ -304,6 +306,24 @@ TestCase {
         compare(comboBox.currentText, "Coco")
         compare(comboBox.editText, "Coco")
         compare(comboBox.currentIndex, 1)
+
+        comboBox.editText = ""
+        keyPress(Qt.Key_C)
+        keyPress(Qt.Key_O)
+        keyPress(Qt.Key_C) // autocompletes "coco"
+        keyPress(Qt.Key_Backspace)
+        keyPress(Qt.Key_Return) // Accept "coc"
+        compare(comboBox.editText, "coc")
+        compare(comboBox.currentText, "coc")
+
+        comboBox.editText = ""
+        keyPress(Qt.Key_C)
+        keyPress(Qt.Key_O)
+        keyPress(Qt.Key_C) // autocompletes "coc"
+        keyPress(Qt.Key_Space)
+        keyPress(Qt.Key_Return) // Accept "coc "
+        compare(comboBox.editText, "coc ")
+        compare(comboBox.currentText, "coc ")
 
         comboBox.destroy()
     }
