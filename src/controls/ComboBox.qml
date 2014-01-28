@@ -348,7 +348,7 @@ Control {
 
         anchors.fill: parent
         anchors.leftMargin: 8
-        anchors.rightMargin: __style.drowDownButtonWidth
+        anchors.rightMargin: __style.dropDownButtonWidth
 
         verticalAlignment: Text.AlignVCenter
 
@@ -427,6 +427,7 @@ Control {
         }
 
         property bool allowComplete: false
+        Keys.forwardTo: comboBox
         Keys.onPressed: allowComplete = (event.key !== Qt.Key_Backspace && event.key !== Qt.Key_Delete);
 
         onTextChanged: {

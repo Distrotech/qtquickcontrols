@@ -499,9 +499,11 @@ void QQuickGridLayoutBase::rearrange(const QSizeF &size)
         qSwap(left, right);
     */
 
+    // Set m_dirty to false in case size hint changes during arrangement.
+    // This could happen if there is a binding like implicitWidth: height
+    QQuickLayout::rearrange(size);
     d->engine.setGeometries(QRectF(QPointF(0,0), size));
 
-    QQuickLayout::rearrange(size);
 }
 
 bool QQuickGridLayoutBase::shouldIgnoreItem(QQuickItem *child, QQuickLayoutAttached *&info, QSizeF *sizeHints)
@@ -545,7 +547,7 @@ QQuickGridLayout::QQuickGridLayout(QQuickItem *parent /* = 0*/)
     \qmlproperty real GridLayout::columnSpacing
 
     This property holds the spacing between each column.
-    The default value is \c 4.
+    The default value is \c 5.
 */
 qreal QQuickGridLayout::columnSpacing() const
 {
@@ -568,7 +570,7 @@ void QQuickGridLayout::setColumnSpacing(qreal spacing)
     \qmlproperty real GridLayout::rowSpacing
 
     This property holds the spacing between each row.
-    The default value is \c 4.
+    The default value is \c 5.
 */
 qreal QQuickGridLayout::rowSpacing() const
 {
@@ -843,13 +845,13 @@ QQuickLinearLayout::QQuickLinearLayout(Qt::Orientation orientation,
     \qmlproperty real RowLayout::spacing
 
     This property holds the spacing between each cell.
-    The default value is \c 4.
+    The default value is \c 5.
 */
 /*!
     \qmlproperty real ColumnLayout::spacing
 
     This property holds the spacing between each cell.
-    The default value is \c 4.
+    The default value is \c 5.
 */
 
 qreal QQuickLinearLayout::spacing() const
